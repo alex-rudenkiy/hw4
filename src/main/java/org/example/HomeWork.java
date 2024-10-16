@@ -11,8 +11,9 @@ public class HomeWork {
      * Реализации очередей из стандартной библиотеки не используем.
      */
     public TicketManager managerFabric() {
-        return null;
+        return new SimpleTicketManager();
     }
+
 
 
     /**

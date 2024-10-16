@@ -1,50 +1,57 @@
 package org.example;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public class HomeWorkTest {
+    private TicketManager ticketManager;
 
-class HomeWorkTest {
+    @BeforeEach public void setUp() {
+        ticketManager = new SimpleTicketManager();
+    }
 
-    HomeWork homeWork = new HomeWork();
+    @Test public void testAddPensionTicket() {
+        Ticket ticket = new Ticket("pension");
+        ticketManager.add(ticket);
 
-    @Test
-    void managerFabric() {
+        assertEquals(ticket, ticketManager.next());
+    }
+
+    @Test public void testAddOtherTicket() {
+        Ticket ticket = new Ticket("concert");
+        ticketManager.add(ticket);
+        assertEquals(ticket, ticketManager.next());
+    }
+
+    @Test public void testNextWithEmptyQueue() {
+        assertNull(ticketManager.next());
+    }
+
+    @Test public void testNextWithMixedTickets() {
+        Ticket pensionTicket = new Ticket("pension");
+        Ticket otherTicket = new Ticket("concert");
+        ticketManager.add(otherTicket);
+        ticketManager.add(pensionTicket);
+
+        assertEquals(pensionTicket, ticketManager.next());
+        assertEquals(otherTicket, ticketManager.next());
     }
 
     @Test
-    void check() {
-        List<Integer> expectedQueue = generateQueue(1, 4);
-        List<String> pairs = generatePairs(expectedQueue);
-        assertEquals(expectedQueue, homeWork.check(pairs));
+    public void testAddNullTicket() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            ticketManager.add(null);
+        });
+        assertEquals("Ticket cannot be null and type cannot be empty.", exception.getMessage());
     }
 
-    private List<String> generatePairs(List<Integer> expectedQueue) {
-        List<String> pairs = new ArrayList<>();
-        Function<Integer, Integer> map = (x) -> (x < 0 || x >= expectedQueue.size()) ? 0 : expectedQueue.get(x);
-
-        for (int i = 0;
-             i < expectedQueue.size(); i++) {
-            pairs.add(String.format("%d:%d", map.apply(i - 1), map.apply(i + 1)));
-        }
-        Collections.shuffle(pairs);
-        return pairs;
+    @Test
+    public void testAddTicketWithEmptyType() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            ticketManager.add(new Ticket(""));
+        });
+        assertEquals("Ticket cannot be null and type cannot be empty.", exception.getMessage());
     }
-
-    private List<Integer> generateQueue(int seed, int length) {
-        return new Random(seed)
-                .ints(1, length * 100)
-                .limit(length)
-                .boxed()
-                .collect(Collectors.toList());
-    }
-
-
 }
